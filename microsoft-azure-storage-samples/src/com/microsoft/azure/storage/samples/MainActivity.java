@@ -2,6 +2,7 @@ package com.microsoft.azure.storage.samples;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.security.KeyStore;
 
 import com.microsoft.azure.storage.samples.blob.BlobGettingStartedTask;
 import com.microsoft.azure.storage.samples.queue.QueueGettingStartedTask;
@@ -11,6 +12,7 @@ import com.microsoft.azure.storage.samples.table.TablePayloadFormatTask;
 import android.app.Activity;
 import android.app.Fragment;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -18,27 +20,35 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import io.netfoundry.ziti.Ziti;
+
 public class MainActivity extends Activity {
 
     /**
      * MODIFY THIS!
-     * 
+     *
      * Stores the storage connection string.
-     * Only use Shared Key authentication (Account Key) for testing purposes! 
-     * Your account name and account key, which give full read/write access to the associated Storage account, 
-     * will be distributed to every person that downloads your app. 
-     * This is not a good practice as you risk having your key compromised by untrusted clients. 
-     * Please consult following documents to understand and use Shared Access Signatures instead. 
+     * Only use Shared Key authentication (Account Key) for testing purposes!
+     * Your account name and account key, which give full read/write access to the associated Storage account,
+     * will be distributed to every person that downloads your app.
+     * This is not a good practice as you risk having your key compromised by untrusted clients.
+     * Please consult following documents to understand and use Shared Access Signatures instead.
      * https://docs.microsoft.com/en-us/rest/api/storageservices/delegating-access-with-a-shared-access-signature
      * https://docs.microsoft.com/en-us/azure/storage/common/storage-dotnet-shared-access-signature-part-1
      */
-    public static final String storageConnectionString = "DefaultEndpointsProtocol=https;"
-            + "AccountName=[MY_ACCOUNT_NAME];"
-            + "AccountKey=[MY_ACCOUNT_KEY]";
+
+    public static final String storageConnectionString = "[YOUR_CONNECTION_KEY]";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        try {
+            KeyStore androidKeyStore = KeyStore.getInstance("AndroidKeyStore");
+            Ziti.INSTANCE.init(this, true, androidKeyStore);
+
+        } catch (Throwable ex) {
+            Log.e("ziti", "failed to load " + ex);
+        }
         setContentView(R.layout.activity_main);
 
         if (savedInstanceState == null) {
@@ -117,25 +127,26 @@ public class MainActivity extends Activity {
 
     /**
      * Prints the specified text value to the view and to LogCat.
-     * 
+     *
      * @param view
      *            The view to print to.
      * @param value
      *            The value to print.
      */
     public void outputText(final TextView view, final String value) {
-        runOnUiThread(new Runnable() {
+        view.post(new Runnable() {
             @Override
             public void run() {
                 view.append(value + "\n");
                 System.out.println(view);
             }
         });
+        //runOnUiThread();
     }
 
     /**
      * Clears the text from the specified view.
-     * 
+     *
      * @param view
      *            The view to clear.
      */
